@@ -35,7 +35,7 @@ pip install -r requirements.txt
 Anytime you install a new package add that to the requirements.txt file
 
 ```console
-pip freeze
+pip freeze >> requirements.txt
 ```
 
 ### Creating directories

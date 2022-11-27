@@ -1,11 +1,17 @@
 import pygame as pg
+import models.computer as computer
+
+COMPUTER_CLK = pg.USEREVENT
 
 
 def main():
     pg.init()
-    screen = pg.display.set_mode((800, 600))
+    screen = pg.display.set_mode((1000, 800))
     pg.display.set_caption("Computer")
-    pgClock = pg.time.Clock()
+    clock = pg.time.Clock()
+    pg.time.set_timer(COMPUTER_CLK, 1000)
+
+    comp = computer.Computer()
 
     running = True
     while running:
@@ -13,12 +19,15 @@ def main():
             if event.type == pg.QUIT:
                 running = False
 
+            if event.type == COMPUTER_CLK:
+                comp.update()
+
         screen.fill((0, 0, 0))
-        # if Computer.clock.timer <= 0 launch computer.update()
-        # Computer draw
+
+        comp.draw(screen)
 
         pg.display.flip()
-        pgClock.tick(60)
+        clock.tick(60)
 
     pg.quit()
 
