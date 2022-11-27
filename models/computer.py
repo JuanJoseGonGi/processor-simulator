@@ -1,13 +1,13 @@
 import pygame as pg
+from models import processor
 
 
 class Computer:
     def __init__(self) -> None:
-        pass
+        self.processor = processor.Processor()
 
-    def update(self):
+    def update(self) -> None:
         print("Executing")
 
-    def draw(self, screen: pg.Surface):
-        # Draw a box to represent the computer
-        pg.draw.rect(screen, (255, 255, 255), (100, 100, 300, 300))
+    def draw(self, screen: pg.Surface) -> None:
+        self.processor.draw(screen)
