@@ -23,8 +23,8 @@ class Button:
         pg.draw.rect(screen, self.color, self.rect)
         pg.draw.rect(screen, (0, 0, 0), self.rect, 2)
 
-        font = pg.font.SysFont("Arial", 20)
-        text = font.render(self.text, True, (0, 0, 0))
-        text_rect = text.get_rect()
+        btn_font = pg.font.SysFont("Arial", 20)
+        btn_text = btn_font.render(self.text, True, (0, 0, 0))
+        text_rect = btn_text.get_rect()
         text_rect.center = self.rect.center
-        screen.blit(text, text_rect)
+        screen.blit(btn_text, text_rect)

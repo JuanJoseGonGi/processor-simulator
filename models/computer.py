@@ -1,10 +1,10 @@
 import pygame as pg
-from models import processor
+from models.processor import Processor
 
 
 class Computer:
     def __init__(self) -> None:
-        self.processor = processor.Processor()
+        self.processor = Processor()
 
     def update(self) -> None:
         print("Executing")

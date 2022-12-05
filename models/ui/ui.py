@@ -1,16 +1,17 @@
 import pygame as pg
 
-from models.ui import instructions_text_input as iti, control_bar
+from models.ui.instructions_text_input import InstructionsTextInput
+from models.ui.control_bar import ControlBar
 
 from typing import List, Sequence, Tuple
 
 
 class UI:
-    def __init__(self, screen) -> None:
-        self.editor = iti.InstructionsTextInput(screen)
+    def __init__(self, screen: pg.Surface) -> None:
+        self.editor = InstructionsTextInput(screen)
         self.show_editor = False
 
-        self.control_bar = control_bar.ControlBar()
+        self.control_bar = ControlBar(screen)
 
     def draw(
         self,
@@ -24,3 +25,5 @@ class UI:
             self.editor.draw(
                 pygame_events, pressed_keys, mouse_x, mouse_y, mouse_pressed
             )
+
+        self.control_bar.draw()

@@ -1,6 +1,6 @@
 import pygame as pg
 import models.computer as computer
-from models.ui import ui
+from models.ui.ui import UI
 
 
 COMPUTER_CLK = pg.USEREVENT
@@ -14,7 +14,7 @@ def main():
     pg.time.set_timer(COMPUTER_CLK, 1000)
 
     comp = computer.Computer()
-    user_interface = ui.UI(screen)
+    user_interface = UI(screen)
 
     running = True
     while running:
