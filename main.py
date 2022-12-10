@@ -1,17 +1,16 @@
 import pygame as pg
+import constants
+
 import models.computer as computer
 from models.ui.ui import UI
 
 
-COMPUTER_CLK = pg.USEREVENT
-
-
 def main():
     pg.init()
-    screen = pg.display.set_mode((1000, 800))
+    screen = pg.display.set_mode((800, 600))
     pg.display.set_caption("Computer")
     clock = pg.time.Clock()
-    pg.time.set_timer(COMPUTER_CLK, 1000)
+    pg.time.set_timer(constants.COMPUTER_CLK, 1000)
 
     comp = computer.Computer()
     user_interface = UI(screen)
@@ -27,8 +26,10 @@ def main():
             if event.type == pg.QUIT:
                 running = False
 
-            if event.type == COMPUTER_CLK:
+            if event.type == constants.COMPUTER_CLK:
                 comp.update()
+
+            user_interface.onevent(event, mouse_x, mouse_y, mouse_pressed)
 
         screen.fill((0, 0, 0))
 

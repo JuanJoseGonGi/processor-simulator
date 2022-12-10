@@ -12,6 +12,7 @@ class UI:
         self.show_editor = False
 
         self.control_bar = ControlBar(screen)
+        self.control_bar.set_toggle_show_editor(self.toggle_show_editor)
 
     def draw(
         self,
@@ -27,3 +28,20 @@ class UI:
             )
 
         self.control_bar.draw()
+
+    def onevent(
+        self,
+        event: pg.event.Event,
+        mouse_x: int,
+        mouse_y: int,
+        mouse_pressed: Tuple[bool, bool, bool],
+    ) -> None:
+        if event.type != pg.MOUSEBUTTONDOWN:
+            self.control_bar.reset()
+            return
+
+        if self.control_bar.rect.collidepoint(mouse_x, mouse_y):
+            self.control_bar.click(mouse_x, mouse_y, mouse_pressed)
+
+    def toggle_show_editor(self):
+        self.show_editor = not self.show_editor

@@ -1,21 +1,17 @@
 import pygame as pg
+import constants
 from pygame_texteditor import TextEditor
 
 from typing import List, Sequence, Tuple
-
-OFFSET_X = 50
-OFFSET_Y = 50
-TEXT_AREA_HEIGHT = 300
-TEXT_AREA_WIDTH = 800
 
 
 class InstructionsTextInput:
     def __init__(self, screen: pg.Surface) -> None:
         self.text_editor = TextEditor(
-            OFFSET_X,
-            OFFSET_Y,
-            TEXT_AREA_WIDTH,
-            TEXT_AREA_HEIGHT,
+            constants.ITI_OFFSET_X,
+            constants.ITI_OFFSET_Y,
+            constants.ITI_TEXT_AREA_WIDTH,
+            constants.ITI_TEXT_AREA_HEIGHT,
             screen,
             line_numbers_flag=True,
         )

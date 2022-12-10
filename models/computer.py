@@ -7,7 +7,7 @@ class Computer:
         self.processor = Processor()
 
     def update(self) -> None:
-        print("Executing")
+        pass
 
     def draw(self, screen: pg.Surface) -> None:
         self.processor.draw(screen)
