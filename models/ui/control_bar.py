@@ -45,5 +45,5 @@ class ControlBar:
         self.show_editor_button.set_onclick(self.toggle_show_editor)
 
     def draw(self) -> None:
-        self.screen.fill((255, 255, 255), self.rect)
+        self.screen.fill(constants.BLUE, self.rect)
         self.show_editor_button.draw(self.screen)

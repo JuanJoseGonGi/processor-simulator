@@ -13,7 +13,6 @@ class InstructionsTextInput:
             constants.ITI_TEXT_AREA_WIDTH,
             constants.ITI_TEXT_AREA_HEIGHT,
             screen,
-            line_numbers_flag=True,
         )
 
     def draw(
