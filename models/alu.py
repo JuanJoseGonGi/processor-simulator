@@ -2,28 +2,62 @@ import pygame as pg
 
 import constants
 
+from models.record import Record
+
 
 class ALU:
-    def __init__(self) -> None:
-        self.x = 10
-        self.y = 30
-        self.width = 100
-        self.height = 100
-        self.rect = pg.Rect(self.x, self.y, self.width, self.height)
+    def __init__(self, parent_rect: pg.rect.Rect) -> None:
+        self.x = constants.ALU_X
+        self.y = constants.ALU_Y
+        self.width = constants.ALU_WIDTH
+        self.height = constants.ALU_HEIGHT
+        self.rect = pg.Rect(
+            self.x + parent_rect.x, self.y + parent_rect.y, self.width, self.height
+        )
 
-    def draw(self, screen: pg.Surface, parent_rect: pg.Rect) -> None:
-        rect = self.rect.copy()
-        rect.x += parent_rect.x
-        rect.y += parent_rect.y
+        self.input_a = Record(
+            0,
+            constants.ALU_INPUT_Y,
+            constants.ALU_INPUT_WIDTH,
+            constants.ALU_INPUT_HEIGHT,
+            self.rect,
+        )
 
+        self.input_a.name = "A"
+
+        self.input_b = Record(
+            self.rect.width * 0.6,
+            constants.ALU_INPUT_Y,
+            constants.ALU_INPUT_WIDTH,
+            constants.ALU_INPUT_HEIGHT,
+            self.rect,
+        )
+
+        self.input_b.name = "B"
+
+        self.output = Record(
+            self.rect.width * 0.3,
+            constants.ALU_OUTPUT_Y,
+            constants.ALU_INPUT_WIDTH,
+            constants.ALU_INPUT_HEIGHT,
+            self.rect,
+        )
+
+        self.output.name = "OUT"
+
+    def draw(self, screen: pg.Surface) -> None:
         points = [
-            (rect.x, rect.y),
-            (rect.x + rect.width * 0.4, rect.y),
-            (rect.x + rect.width * 0.5, rect.y + rect.height * 0.5),
-            (rect.x + rect.width * 0.6, rect.y),
-            (rect.x + rect.width, rect.y),
-            (rect.x + rect.width * 0.6, rect.y + rect.height),
-            (rect.x + rect.width * 0.4, rect.y + rect.height),
+            (self.rect.x, self.rect.y),
+            (self.rect.x + self.rect.width * 0.4, self.rect.y),
+            (self.rect.x + self.rect.width * 0.5, self.rect.y + self.rect.height * 0.5),
+            (self.rect.x + self.rect.width * 0.6, self.rect.y),
+            (self.rect.x + self.rect.width, self.rect.y),
+            (self.rect.x + self.rect.width * 0.6, self.rect.y + self.rect.height),
+            (self.rect.x + self.rect.width * 0.4, self.rect.y + self.rect.height),
         ]
 
-        pg.draw.polygon(screen, constants.PURPLE, points)
+        pg.draw.polygon(screen, constants.BLUE, points)
+
+        self.input_a.draw(screen)
+        self.input_b.draw(screen)
+        self.output.draw(screen)
