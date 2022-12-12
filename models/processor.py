@@ -3,6 +3,8 @@ import pygame as pg
 from models.alu import ALU
 from models.record import Record
 from models.control_unit import ControlUnit
+from models.bus import Bus
+from models.instruction import Instruction
 
 import constants
 
@@ -84,7 +86,10 @@ class Processor:
 
             self.general_records.append(record)
 
-    def update(self) -> None:
+        self.current_cycle = constants.PROCESSOR_CYCLES[0]
+        self.current_instruction: Instruction | None = None
+
+    def update(self, system_bus: List[Bus]) -> None:
         pass
 
     def draw(self, screen: pg.Surface) -> None:
