@@ -31,7 +31,7 @@ def main():
 
             user_interface.onevent(event, mouse_x, mouse_y, mouse_pressed)
 
-        screen.fill(constants.PINK)
+        screen.fill(constants.BLACK)
 
         comp.draw(screen)
         user_interface.draw(

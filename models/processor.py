@@ -9,6 +9,13 @@ from models.instruction import Instruction
 import constants
 
 from typing import List
+from enum import Enum
+
+
+class ProcessorCycle(Enum):
+    FETCH = 0
+    DECODE = 1
+    EXECUTE = 2
 
 
 class Processor:
@@ -64,14 +71,15 @@ class Processor:
 
         self.general_records: List[Record] = []
 
+        half_general_records_length = constants.GENERAL_RECORDS_LENGTH // 2
         for i in range(constants.GENERAL_RECORDS_LENGTH):
             x = float(constants.GENERAL_RECORDS_X)
-            if i % 2 != 0:
+            if i >= half_general_records_length != 0:
                 x = constants.GENERAL_RECORDS_X + constants.GENERAL_RECORDS_WIDTH
 
             y = (
                 constants.GENERAL_RECORDS_Y
-                + (i // 2) * constants.GENERAL_RECORDS_HEIGHT
+                + (i % half_general_records_length) * constants.GENERAL_RECORDS_HEIGHT
             )
 
             record = Record(
@@ -82,12 +90,20 @@ class Processor:
                 self.rect,
             )
 
-            record.name = f"R{i}"
+            record.name = f"R{i:02d}"
 
             self.general_records.append(record)
 
-        self.current_cycle = constants.PROCESSOR_CYCLES[0]
+        self.current_cycle = ProcessorCycle.FETCH
         self.current_instruction: Instruction | None = None
+
+    def fetch(self) -> None:
+        self.MAR.set_data(self.PC.data)
+        self.PC.set_data(self.PC.data + 1)
+
+    def decode(self) -> None:
+        self.IR.set_data(self.MBR.data)
+        self.current_instruction = Instruction(self.IR.data)
 
     def update(self, system_bus: List[Bus]) -> None:
         pass

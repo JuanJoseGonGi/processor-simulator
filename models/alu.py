@@ -16,7 +16,7 @@ class ALU:
         )
 
         self.input_a = Record(
-            0,
+            0.45 * self.rect.width - constants.ALU_INPUT_WIDTH,
             constants.ALU_INPUT_Y,
             constants.ALU_INPUT_WIDTH,
             constants.ALU_INPUT_HEIGHT,
@@ -26,7 +26,7 @@ class ALU:
         self.input_a.name = "A"
 
         self.input_b = Record(
-            self.rect.width * 0.6,
+            self.rect.width * 0.55,
             constants.ALU_INPUT_Y,
             constants.ALU_INPUT_WIDTH,
             constants.ALU_INPUT_HEIGHT,
@@ -36,7 +36,7 @@ class ALU:
         self.input_b.name = "B"
 
         self.output = Record(
-            self.rect.width * 0.3,
+            self.rect.width / 2 - constants.ALU_INPUT_WIDTH / 2,
             constants.ALU_OUTPUT_Y,
             constants.ALU_INPUT_WIDTH,
             constants.ALU_INPUT_HEIGHT,
@@ -52,8 +52,8 @@ class ALU:
             (self.rect.x + self.rect.width * 0.5, self.rect.y + self.rect.height * 0.5),
             (self.rect.x + self.rect.width * 0.6, self.rect.y),
             (self.rect.x + self.rect.width, self.rect.y),
-            (self.rect.x + self.rect.width * 0.6, self.rect.y + self.rect.height),
-            (self.rect.x + self.rect.width * 0.4, self.rect.y + self.rect.height),
+            (self.rect.x + self.rect.width * 0.75, self.rect.y + self.rect.height),
+            (self.rect.x + self.rect.width * 0.25, self.rect.y + self.rect.height),
         ]
 
         pg.draw.polygon(screen, constants.BLUE, points)
