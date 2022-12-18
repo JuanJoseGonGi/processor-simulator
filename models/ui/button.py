@@ -51,7 +51,7 @@ class Button:
     def set_onreset(self, onreset: Callable[[], None]) -> None:
         self.onreset = onreset
 
-    def draw(self, screen: pg.Surface) -> None:
+    def draw(self, screen: pg.surface.Surface) -> None:
         pg.draw.rect(screen, self.color, self.rect)
 
         btn_font = pg.font.SysFont(constants.FONT, 20)

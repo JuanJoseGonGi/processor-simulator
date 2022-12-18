@@ -6,7 +6,7 @@ from typing import List, Sequence, Tuple
 
 
 class InstructionsTextInput:
-    def __init__(self, screen: pg.Surface) -> None:
+    def __init__(self, screen: pg.surface.Surface) -> None:
         self.text_editor = TextEditor(
             constants.ITI_OFFSET_X,
             constants.ITI_OFFSET_Y,

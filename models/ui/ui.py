@@ -7,7 +7,7 @@ from typing import List, Sequence, Tuple
 
 
 class UI:
-    def __init__(self, screen: pg.Surface) -> None:
+    def __init__(self, screen: pg.surface.Surface) -> None:
         self.editor = InstructionsTextInput(screen)
         self.show_editor = False
 
@@ -34,7 +34,7 @@ class UI:
         event: pg.event.Event,
         mouse_x: int,
         mouse_y: int,
-        mouse_pressed: Tuple[bool, bool, bool],
+        mouse_pressed: Tuple[bool, bool, bool] | Tuple[bool, bool, bool, bool, bool],
     ) -> None:
         if event.type != pg.MOUSEBUTTONDOWN:
             self.control_bar.reset()

@@ -45,7 +45,9 @@ class ALU:
 
         self.output.name = "OUT"
 
-    def draw(self, screen: pg.Surface) -> None:
+        self.instruction = None
+
+    def draw(self, screen: pg.surface.Surface) -> None:
         points = [
             (self.rect.x, self.rect.y),
             (self.rect.x + self.rect.width * 0.4, self.rect.y),

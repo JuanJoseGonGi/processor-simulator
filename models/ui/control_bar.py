@@ -29,7 +29,7 @@ class ControlBar:
         self,
         mouse_x: int,
         mouse_y: int,
-        mouse_pressed: Tuple[bool, bool, bool],
+        mouse_pressed: Tuple[bool, bool, bool] | Tuple[bool, bool, bool, bool, bool],
     ) -> None:
         if not mouse_pressed[0]:
             return

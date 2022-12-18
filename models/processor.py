@@ -2,32 +2,22 @@ import pygame as pg
 
 from models.alu import ALU
 from models.record import Record
-from models.control_unit import ControlUnit
-from models.bus import Bus
-from models.instruction import Instruction
+from models.control.control_unit import ControlUnit
+from models.interface import Interface
+from models.buses.system_bus import SystemBus
 
 import constants
 
 from typing import List
-from enum import Enum
-
-
-class ProcessorCycle(Enum):
-    FETCH = 0
-    DECODE = 1
-    EXECUTE = 2
 
 
 class Processor:
-    def __init__(self) -> None:
+    def __init__(self, system_bus: SystemBus) -> None:
         self.x = constants.PROCESSOR_X
         self.y = constants.PROCESSOR_Y
         self.width = constants.PROCESSOR_WIDTH
         self.height = constants.PROCESSOR_HEIGHT
         self.rect = pg.Rect(self.x, self.y, self.width, self.height)
-
-        self.ALU = ALU(self.rect)
-        self.UC = ControlUnit(self.rect)
 
         self.PC = Record(
             constants.PC_X,
@@ -36,7 +26,6 @@ class Processor:
             constants.PC_HEIGHT,
             self.rect,
         )
-
         self.PC.name = "PC"
 
         self.MBR = Record(
@@ -46,7 +35,6 @@ class Processor:
             constants.MBR_HEIGHT,
             self.rect,
         )
-
         self.MBR.name = "MBR"
 
         self.MAR = Record(
@@ -56,7 +44,6 @@ class Processor:
             constants.MAR_HEIGHT,
             self.rect,
         )
-
         self.MAR.name = "MAR"
 
         self.IR = Record(
@@ -66,7 +53,6 @@ class Processor:
             constants.IR_HEIGHT,
             self.rect,
         )
-
         self.IR.name = "IR"
 
         self.general_records: List[Record] = []
@@ -94,21 +80,21 @@ class Processor:
 
             self.general_records.append(record)
 
-        self.current_cycle = ProcessorCycle.FETCH
-        self.current_instruction: Instruction | None = None
+        self.address_iface = Interface(
+            system_bus.address_bus,
+        )
+        self.data_iface = Interface(system_bus.data_bus)
+        self.control_iface = Interface(
+            system_bus.control_bus,
+        )
 
-    def fetch(self) -> None:
-        self.MAR.set_data(self.PC.data)
-        self.PC.set_data(self.PC.data + 1)
+        self.ALU = ALU(self.rect)
+        self.UC = ControlUnit(self.rect, self.PC, self.MBR, self.MAR, self.IR, self.ALU)
 
-    def decode(self) -> None:
-        self.IR.set_data(self.MBR.data)
-        self.current_instruction = Instruction(self.IR.data)
+    def update(self) -> None:
+        self.UC.update()
 
-    def update(self, system_bus: List[Bus]) -> None:
-        pass
-
-    def draw(self, screen: pg.Surface) -> None:
+    def draw(self, screen: pg.surface.Surface) -> None:
         pg.draw.rect(screen, constants.DARK_GREEN, self.rect)
 
         self.ALU.draw(screen)
