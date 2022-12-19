@@ -159,6 +159,8 @@ class ControlUnit:
 
         if control_signal == ControlSignal.EXECUTE_ALU:
             self.ALU.execute()
+            self.ALU.input_a.set_data(None, instruction)
+            self.ALU.input_b.set_data(None, instruction)
             return
 
         if control_signal == ControlSignal.COPY_MBR_TO_PC_IF_TRUE:
