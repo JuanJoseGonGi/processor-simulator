@@ -104,7 +104,7 @@ class Processor:
         self.UC.update()
 
     def draw(self, screen: pg.surface.Surface) -> None:
-        pg.draw.rect(screen, constants.DARK_GREEN, self.rect)
+        pg.draw.rect(screen, constants.DARK_BLUE, self.rect)
 
         self.ALU.draw(screen)
         self.UC.draw(screen)
