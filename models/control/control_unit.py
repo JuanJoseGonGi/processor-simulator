@@ -5,12 +5,20 @@ from models.alu import ALU
 from models.instructions.instruction import Instruction
 from models.control.control_signal import ControlSignal
 from models.control.instructions_set import InstructionsSet
+from models.control.instructions_set import Codop
 from models.interface import Interface
 from models.memories.memory_mode import MemoryMode
 
 import constants
 
 from typing import List
+
+FETCH = [
+    [ControlSignal.COPY_PC_TO_MAR],
+    [ControlSignal.READ_FROM_MEMORY],
+    [ControlSignal.COPY_DATA_IFACE_TO_MBR],
+    [ControlSignal.COPY_MBR_TO_IR, ControlSignal.INCREASE_PC],
+]
 
 
 class ControlUnit:
@@ -22,9 +30,9 @@ class ControlUnit:
         MAR: Record,
         IR: Record,
         ALU: ALU,
-        address_iface: Interface[str],
-        data_iface: Interface[str],
-        control_iface: Interface[MemoryMode],
+        address_iface: Interface[str | None],
+        data_iface: Interface[str | None],
+        control_iface: Interface[MemoryMode | None],
         stack: List[Record],
     ) -> None:
         self.x = constants.CONTROL_UNIT_X
@@ -49,6 +57,8 @@ class ControlUnit:
         self.instructions_pipeline: List[Instruction] = []
         self.instructions_set = InstructionsSet()
 
+        self.fetch_stage = 0
+
     def add_instruction(self, instruction: Instruction) -> None:
         self.instructions_pipeline.append(instruction)
 
@@ -60,7 +70,7 @@ class ControlUnit:
         if pc_data is None:
             raise Exception("PC data is None")
 
-        if pc_data == "31":
+        if pc_data == "15":
             self.PC.set_data("00")
             return
 
@@ -88,8 +98,10 @@ class ControlUnit:
         return
 
     def send_control_signal(
-        self, control_signal: ControlSignal, instruction: Instruction
+        self, control_signal: ControlSignal, instruction: Instruction | None = None
     ) -> None:
+        print(f"Sending control signal: {control_signal} on instruction: {instruction}")
+
         if control_signal == ControlSignal.COPY_PC_TO_MAR:
             self.MAR.set_data(self.PC.get_data())
             return
@@ -121,6 +133,10 @@ class ControlUnit:
             self.data_iface.set_data(self.MBR.get_data())
             return
 
+        if control_signal == ControlSignal.COPY_DATA_IFACE_TO_MBR:
+            self.MBR.set_data(self.data_iface.get_data())
+            return
+
         if control_signal == ControlSignal.INCREASE_PC:
             self.increase_pc()
             return
@@ -141,16 +157,8 @@ class ControlUnit:
             self.ALU.output.set_data(self.stack_pop())
             return
 
-        if control_signal == ControlSignal.COPY_CODOP_TO_ALU:
-            self.ALU.set_codop(instruction.codop)
-            return
-
         if control_signal == ControlSignal.EXECUTE_ALU:
             self.ALU.execute()
-            return
-
-        if control_signal == ControlSignal.DONE:
-            self.remove_instruction(instruction)
             return
 
         if control_signal == ControlSignal.COPY_MBR_TO_PC_IF_TRUE:
@@ -166,17 +174,76 @@ class ControlUnit:
 
             return
 
+        if control_signal == ControlSignal.CLEAR_PIPELINE:
+            self.instructions_pipeline = []
+            self.fetch_stage = 0
+            return
+
+        if instruction is None:
+            return
+
+        if control_signal == ControlSignal.COPY_CODOP_TO_ALU:
+            self.ALU.set_codop(instruction.codop)
+            return
+
+        if control_signal == ControlSignal.DONE:
+            self.remove_instruction(instruction)
+            return
+
     def send_control_signals(
-        self, control_signals: List[ControlSignal], instruction: Instruction
+        self,
+        control_signals: List[ControlSignal],
+        instruction: Instruction | None = None,
     ) -> None:
         for signal in control_signals:
             self.send_control_signal(signal, instruction)
+
+    def fetch(self) -> None:
+        if len(self.instructions_pipeline) >= 5:
+            return
+
+        if self.fetch_stage >= len(FETCH):
+            self.fetch_stage = 0
+
+        signals = FETCH[self.fetch_stage]
+        self.send_control_signals(signals)
+
+    def decode(self) -> None:
+        if len(self.instructions_pipeline) >= 5:
+            return
+
+        if self.fetch_stage != 0:
+            return
+
+        ir_data = self.IR.get_data()
+        if ir_data is None:
+            return
+
+        decoded_instruction = ir_data.split()
+        if len(decoded_instruction) == 0:
+            return
+
+        if decoded_instruction[0] not in Codop:
+            return
+
+        codop = Codop[decoded_instruction[0]]
+
+        if len(decoded_instruction) == 1:
+            decoded_instruction.append("")
+
+        instruction = Instruction(codop, decoded_instruction[1])
+        self.instructions_pipeline.append(instruction)
 
     def update(self) -> None:
         for instruction in self.instructions_pipeline:
             signals = instruction.update()
             self.send_control_signals(signals, instruction)
             instruction.increase_stage()
+
+        self.fetch()
+        self.fetch_stage += 1
+
+        self.decode()
 
     def draw(self, screen: pg.surface.Surface) -> None:
         pg.draw.rect(screen, constants.GREEN, self.rect)

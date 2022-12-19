@@ -4,12 +4,8 @@ from models.data_holder import DataHolder
 
 import constants
 
-from typing import TypeVar
 
-T = TypeVar("T")
-
-
-class MemoryCell(DataHolder[T]):
+class MemoryCell(DataHolder[str | None]):
     def __init__(self, x: float, y: float, address: str, parent_rect: pg.rect.Rect):
         self.x = x
         self.y = y

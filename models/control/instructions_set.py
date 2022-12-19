@@ -5,22 +5,22 @@ from typing import List, Dict
 
 
 class Codop(Enum):
-    ADD = "0000"
-    SUB = "0001"
-    MPY = "0010"
-    DIV = "0011"
-    PUSH = "0100"
-    POP = "0101"
-    ABS = "0110"
-    AND = "0111"
-    OR = "1000"
-    NOT = "1001"
-    COMPARE = "1010"
-    INPUT = "1011"
-    OUTPUT = "1100"
-    CONDJUMP = "1101"
-    RETURN = "1110"
-    START_IO = "1111"
+    ADD = "ADD"
+    SUB = "SUB"
+    MPY = "MPY"
+    DIV = "DIV"
+    PUSH = "PUSH"
+    POP = "POP"
+    ABS = "ABS"
+    AND = "AND"
+    OR = "OR"
+    NOT = "NOT"
+    COMPARE = "COMPARE"
+    INPUT = "INPUT"
+    OUTPUT = "OUTPUT"
+    CONDJUMP = "CONDJUMP"
+    RETURN = "RETURN"
+    START_IO = "START_IO"
 
 
 UNARY_OPERATION: List[List[ControlSignal]] = [
@@ -42,6 +42,7 @@ INSTRUCTION_SET: Dict[Codop, List[List[ControlSignal]]] = {
     Codop.PUSH: [
         [ControlSignal.COPY_IR_TO_MAR],
         [ControlSignal.READ_FROM_MEMORY],
+        [ControlSignal.COPY_DATA_IFACE_TO_MBR],
         [ControlSignal.PUSH_MBR_TO_STACK],
     ],
     Codop.POP: [

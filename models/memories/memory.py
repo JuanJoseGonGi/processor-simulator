@@ -7,8 +7,6 @@ from models.memories.memory_mode import MemoryMode
 from models.interface import Interface
 from models.buses.system_bus import SystemBus
 
-from typing import Any
-
 
 class Memory:
     def __init__(self, system_bus: SystemBus):
@@ -73,8 +71,11 @@ class Memory:
 
         self.address = received_address
 
-    def get_data(self) -> Any:
-        return self.data[self.address]
+    def get_data(self) -> str | None:
+        if self.address not in self.data:
+            raise Exception(f"Memory address {self.address} not found")
+
+        return self.data[self.address].get_data()
 
     def set_data(self) -> None:
         if self.address == "":
@@ -106,7 +107,8 @@ class Memory:
             return
 
         if self.control == MemoryMode.READ:
-            self.data_iface.set_data(self.get_data())
+            data = self.get_data()
+            self.data_iface.set_data(data)
             return
 
         if self.control == MemoryMode.WRITE:

@@ -13,17 +13,9 @@ class Interface(DataHolder[T]):
     ):
         self.bus = bus
 
-    def set_data(
-        self, data: T | None = None, source_data_holder: DataHolder[T] | None = None
-    ) -> None:
-        if data is not None:
-            self.bus.set_data(data)
-            return
-
-        if source_data_holder is not None:
-            data = source_data_holder.get_data()
-            self.bus.set_data(data)
-            return
+    def set_data(self, data: T | None) -> None:
+        self.bus.set_data(data)
+        return
 
     def get_data(self) -> T | None:
         return self.bus.get_data()

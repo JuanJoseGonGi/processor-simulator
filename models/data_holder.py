@@ -20,15 +20,12 @@ class DataHolder(Generic[T]):
     def get_data(self) -> T | None:
         return self.data
 
-    def set_data(
-        self, data: T | None = None, source_data_holder: DataHolder | None = None
-    ) -> None:
+    def set_data(self, data: T | None) -> None:
         if data is not None:
             self.data = data
-        elif source_data_holder is not None:
-            self.data = source_data_holder.get_data()
-        else:
-            self.data = None
-            self.status = DataHolderStatus.IDLE
+            self.status = DataHolderStatus.BUSY
 
-        self.status = DataHolderStatus.BUSY
+            return
+
+        self.data = None
+        self.status = DataHolderStatus.IDLE

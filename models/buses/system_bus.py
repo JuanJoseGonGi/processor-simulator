@@ -8,7 +8,7 @@ import constants
 
 class SystemBus:
     def __init__(self):
-        self.address_bus = Bus[str](
+        self.address_bus = Bus[str | None](
             constants.SYSTEM_BUS_WIDTH,
             [
                 (constants.SYSTEM_BUS_ADDRESS_X, constants.SYSTEM_BUS_Y),
@@ -19,7 +19,7 @@ class SystemBus:
             ],
         )
 
-        self.data_bus = Bus[str](
+        self.data_bus = Bus[str | None](
             constants.SYSTEM_BUS_WIDTH,
             [
                 (constants.SYSTEM_BUS_DATA_X, constants.SYSTEM_BUS_Y),
@@ -30,7 +30,7 @@ class SystemBus:
             ],
         )
 
-        self.control_bus = Bus[MemoryMode](
+        self.control_bus = Bus[MemoryMode | None](
             constants.SYSTEM_BUS_WIDTH,
             [
                 (constants.SYSTEM_BUS_CONTROL_X, constants.SYSTEM_BUS_Y),
