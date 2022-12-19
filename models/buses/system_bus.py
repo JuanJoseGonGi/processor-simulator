@@ -1,7 +1,7 @@
 import pygame as pg
 
 from models.buses.bus import Bus
-from models.control.control_unit import ControlSignal
+from models.memories.memory_mode import MemoryMode
 
 import constants
 
@@ -19,7 +19,7 @@ class SystemBus:
             ],
         )
 
-        self.data_bus = Bus[int | str](
+        self.data_bus = Bus[str](
             constants.SYSTEM_BUS_WIDTH,
             [
                 (constants.SYSTEM_BUS_DATA_X, constants.SYSTEM_BUS_Y),
@@ -30,7 +30,7 @@ class SystemBus:
             ],
         )
 
-        self.control_bus = Bus[ControlSignal](
+        self.control_bus = Bus[MemoryMode](
             constants.SYSTEM_BUS_WIDTH,
             [
                 (constants.SYSTEM_BUS_CONTROL_X, constants.SYSTEM_BUS_Y),

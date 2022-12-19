@@ -27,6 +27,7 @@ class Processor:
             self.rect,
         )
         self.PC.name = "PC"
+        self.PC.set_data("00")
 
         self.MBR = Record(
             constants.MBR_X,
@@ -55,30 +56,27 @@ class Processor:
         )
         self.IR.name = "IR"
 
-        self.general_records: List[Record] = []
+        self.stack: List[Record] = []
 
-        half_general_records_length = constants.GENERAL_RECORDS_LENGTH // 2
-        for i in range(constants.GENERAL_RECORDS_LENGTH):
-            x = float(constants.GENERAL_RECORDS_X)
-            if i >= half_general_records_length != 0:
-                x = constants.GENERAL_RECORDS_X + constants.GENERAL_RECORDS_WIDTH
+        half_stack_length = constants.STACK_LENGTH // 2
+        for i in range(constants.STACK_LENGTH):
+            x = float(constants.STACK_X)
+            if i >= half_stack_length != 0:
+                x = constants.STACK_X + constants.STACK_WIDTH
 
-            y = (
-                constants.GENERAL_RECORDS_Y
-                + (i % half_general_records_length) * constants.GENERAL_RECORDS_HEIGHT
-            )
+            y = constants.STACK_Y + (i % half_stack_length) * constants.STACK_HEIGHT
 
             record = Record(
                 x,
                 y,
-                constants.GENERAL_RECORDS_WIDTH,
-                constants.GENERAL_RECORDS_HEIGHT,
+                constants.STACK_WIDTH,
+                constants.STACK_HEIGHT,
                 self.rect,
             )
 
             record.name = f"R{i:02d}"
 
-            self.general_records.append(record)
+            self.stack.append(record)
 
         self.address_iface = Interface(
             system_bus.address_bus,
@@ -89,7 +87,18 @@ class Processor:
         )
 
         self.ALU = ALU(self.rect)
-        self.UC = ControlUnit(self.rect, self.PC, self.MBR, self.MAR, self.IR, self.ALU)
+        self.UC = ControlUnit(
+            self.rect,
+            self.PC,
+            self.MBR,
+            self.MAR,
+            self.IR,
+            self.ALU,
+            self.address_iface,
+            self.data_iface,
+            self.control_iface,
+            self.stack,
+        )
 
     def update(self) -> None:
         self.UC.update()
@@ -105,5 +114,5 @@ class Processor:
         self.MAR.draw(screen)
         self.IR.draw(screen)
 
-        for record in self.general_records:
+        for record in self.stack:
             record.draw(screen)

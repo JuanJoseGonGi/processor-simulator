@@ -10,31 +10,31 @@
 
 Create a virtual environment.
 
-```console
+```shell
 python -m venv venv
 ```
 
 Activate the environment. (Remember to activate it on your IDE).
 
-```console
+```shell
 source venv/bin/activate
 ```
 
 When finishing work you could deactivate the environment.
 
-```console
+```shell
 deactivate
 ```
 
 Install pip dependencies
 
-```console
+```shell
 pip install -r requirements.txt
 ```
 
 Anytime you install a new package add that to the requirements.txt file
 
-```console
+```shell
 pip freeze > requirements.txt
 ```
 

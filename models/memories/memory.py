@@ -2,8 +2,8 @@ import pygame as pg
 
 import constants
 
-from models.data_holder import DataHolder
 from models.memories.memory_cell import MemoryCell
+from models.memories.memory_mode import MemoryMode
 from models.interface import Interface
 from models.buses.system_bus import SystemBus
 
@@ -19,7 +19,7 @@ class Memory:
         self.rect = pg.Rect(self.x, self.y, self.width, self.height)
 
         self.address = ""
-        self.control = ""
+        self.control = MemoryMode.IDLE
 
         self.address_iface = Interface(
             system_bus.address_bus,
@@ -40,55 +40,56 @@ class Memory:
             )
             self.data[address] = MemoryCell(x, y, address, self.rect)
 
-    def get_address(self) -> str:
-        return self.address
-
-    def set_address(self, address: str) -> None:
-        self.address = address
-
-    def reset_address(self) -> None:
-        self.address = ""
-
-    def get_data(self) -> Any:
-        if self.address == "":
-            raise Exception("Memory address not specified")
-
-        if self.address not in self.data:
-            raise Exception(f"Memory address {self.address} not found")
-
-        return self.data[self.address]
-
-    def set_data(
-        self, data: Any = None, source_data_holder: DataHolder | None = None
-    ) -> None:
-        if self.address == "":
-            raise Exception("Memory address not specified")
-
-        if self.address not in self.data:
-            raise Exception(f"Memory address {self.address} not found")
-
-        if data is not None:
-            self.data[self.address].set_data(data)
+    def set_address(self) -> None:
+        received_address = self.address_iface.get_data()
+        if received_address is None:
+            self.address = ""
             return
 
-        if source_data_holder is not None:
-            self.data[self.address].set_data(source_data_holder=source_data_holder)
+        self.address = received_address
 
-    def reset(self) -> None:
-        for cell in self.data.values():
-            cell.reset()
+    def get_data(self) -> Any:
+        return self.data[self.address]
 
-    def set_control(self, control: str) -> None:
-        self.control = control
+    def set_data(self) -> None:
+        if self.address == "":
+            raise Exception("Memory address not specified")
 
-    def reset_control(self) -> None:
-        self.control = ""
+        if self.address not in self.data:
+            raise Exception(f"Memory address {self.address} not found")
+
+        received_data = self.data_iface.get_data()
+        self.data[self.address].set_data(received_data)
+
+        return
+
+    def set_control(self) -> None:
+        received_control = self.control_iface.get_data()
+        if received_control is None:
+            self.control = MemoryMode.IDLE
+            return
+
+        self.control = received_control
 
     def update(self):
-        self.control_iface.get_data()
+        self.set_control()
+        if self.control == MemoryMode.IDLE:
+            return
+
+        self.set_address()
+        if self.address == "":
+            return
+
+        if self.control == MemoryMode.READ:
+            self.data_iface.set_data(self.get_data())
+            return
+
+        if self.control == MemoryMode.WRITE:
+            self.set_data()
+            return
 
     def draw(self, screen: pg.surface.Surface):
-        pg.draw.rect(screen, constants.GREEN, self.rect)
+        pg.draw.rect(screen, constants.PINK, self.rect)
 
         for cell in self.data.values():
             cell.draw(screen)

@@ -23,6 +23,7 @@ class Interface(DataHolder[T]):
         if source_data_holder is not None:
             data = source_data_holder.get_data()
             self.bus.set_data(data)
+            return
 
     def get_data(self) -> T | None:
         return self.bus.get_data()

@@ -27,9 +27,8 @@ class DataHolder(Generic[T]):
             self.data = data
         elif source_data_holder is not None:
             self.data = source_data_holder.get_data()
+        else:
+            self.data = None
+            self.status = DataHolderStatus.IDLE
 
         self.status = DataHolderStatus.BUSY
-
-    def reset(self) -> None:
-        self.data = self.initial_data
-        self.status = DataHolderStatus.IDLE
