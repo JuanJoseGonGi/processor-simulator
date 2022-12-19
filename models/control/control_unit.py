@@ -44,6 +44,7 @@ class ControlUnit:
         self.data_iface = data_iface
         self.control_iface = control_iface
         self.stack = stack
+        self.stack_pointer = 31
 
         self.instructions_pipeline: List[Instruction] = []
         self.instructions_set = InstructionsSet()
@@ -67,6 +68,25 @@ class ControlUnit:
 
         self.PC.set_data(f"{increased_pc_data:02d}")
 
+    def stack_pop(self) -> str | None:
+        if self.stack_pointer > 31:
+            return None
+
+        data = self.stack[self.stack_pointer].get_data()
+        self.stack[self.stack_pointer].set_data(None)
+        self.stack_pointer += 1
+
+        return data
+
+    def stack_push(self, data: str | None) -> None:
+        if self.stack_pointer < 1:
+            raise Exception("Stack overflow")
+
+        self.stack_pointer -= 1
+        self.stack[self.stack_pointer].set_data(self.MBR.get_data())
+
+        return
+
     def send_control_signal(
         self, control_signal: ControlSignal, instruction: Instruction
     ) -> None:
@@ -80,6 +100,10 @@ class ControlUnit:
 
         if control_signal == ControlSignal.COPY_MBR_TO_IR:
             self.IR.set_data(self.MBR.get_data())
+            return
+
+        if control_signal == ControlSignal.COPY_IR_TO_MAR:
+            self.MAR.set_data(self.IR.get_data())
             return
 
         if control_signal == ControlSignal.COPY_ALU_TO_MBR:
@@ -99,6 +123,30 @@ class ControlUnit:
 
         if control_signal == ControlSignal.INCREASE_PC:
             self.increase_pc()
+            return
+
+        if control_signal == ControlSignal.PUSH_MBR_TO_STACK:
+            self.stack_push(self.MBR.get_data())
+            return
+
+        if control_signal == ControlSignal.POP_STACK_TO_MBR:
+            self.MBR.set_data(self.stack_pop())
+            return
+
+        if control_signal == ControlSignal.PUSH_ALU_TO_STACK:
+            self.stack_push(self.ALU.output.get_data())
+            return
+
+        if control_signal == ControlSignal.POP_STACK_TO_ALU:
+            self.ALU.output.set_data(self.stack_pop())
+            return
+
+        if control_signal == ControlSignal.COPY_CODOP_TO_ALU:
+            self.ALU.set_codop(instruction.codop)
+            return
+
+        if control_signal == ControlSignal.EXECUTE_ALU:
+            self.ALU.execute()
             return
 
         if control_signal == ControlSignal.DONE:

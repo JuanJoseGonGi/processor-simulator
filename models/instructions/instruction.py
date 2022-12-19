@@ -1,4 +1,5 @@
 from models.control.control_signal import ControlSignal
+from models.control.instructions_set import Codop
 
 from typing import List
 from enum import Enum
@@ -26,7 +27,7 @@ FETCH_STAGES = [
 
 
 class Instruction:
-    def __init__(self, codop: str, addr: str = "") -> None:
+    def __init__(self, codop: Codop, addr: str = "") -> None:
         self.codop = codop
         self.addr = addr
         self.cycle_index = 0

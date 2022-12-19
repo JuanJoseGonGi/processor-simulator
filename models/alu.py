@@ -1,8 +1,9 @@
 import pygame as pg
 
-import constants
-
+from models.control.instructions_set import Codop
 from models.record import Record
+
+import constants
 
 
 class ALU:
@@ -22,7 +23,6 @@ class ALU:
             constants.ALU_INPUT_HEIGHT,
             self.rect,
         )
-
         self.input_a.name = "A"
 
         self.input_b = Record(
@@ -32,7 +32,6 @@ class ALU:
             constants.ALU_INPUT_HEIGHT,
             self.rect,
         )
-
         self.input_b.name = "B"
 
         self.output = Record(
@@ -42,10 +41,34 @@ class ALU:
             constants.ALU_INPUT_HEIGHT,
             self.rect,
         )
-
         self.output.name = "OUT"
 
-        self.instruction = None
+        self.codop: Codop | None = None
+
+    def set_codop(self, codop: Codop) -> None:
+        self.codop = codop
+
+    def add(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        number_a = int(data_a)
+        number_b = int(data_b)
+        output = number_a + number_b
+
+        self.output.set_data(str(output))
+
+    def execute(self) -> None:
+        if self.codop is None:
+            return
+
+        if self.codop == Codop.ADD:
+            self.add()
 
     def draw(self, screen: pg.surface.Surface) -> None:
         points = [
