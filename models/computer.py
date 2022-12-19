@@ -9,6 +9,8 @@ from models.buses.system_bus import SystemBus
 
 import constants
 
+from typing import List
+
 
 class Computer:
     def __init__(self) -> None:
@@ -129,3 +131,6 @@ class Computer:
         self.transition_address_bus_to_memory.draw(screen)
         self.transition_data_bus_to_memory.draw(screen)
         self.transition_control_bus_to_memory.draw(screen)
+
+    def set_intructions(self, instructions: List[str]):
+        self.main_memory.set_instructions(instructions)

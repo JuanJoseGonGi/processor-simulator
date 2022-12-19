@@ -27,9 +27,13 @@ def main():
 
             if event.type == constants.COMPUTER_CLK:
                 comp.update()
-
+            
+            if event.type == constants.PRESS_LOAD:
+                instructions = user_interface.editor.get_instructions()
+                comp.set_intructions(instructions)
+            
             user_interface.onevent(event, mouse_x, mouse_y, mouse_pressed)
-
+                
         screen.fill(constants.BLACK)
 
         comp.draw(screen)
@@ -41,6 +45,8 @@ def main():
         clock.tick(60)
 
     pg.quit()
+
+    
 
 
 if __name__ == "__main__":

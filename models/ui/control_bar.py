@@ -31,6 +31,14 @@ class ControlBar:
             "Next",
         )
 
+        self.load_step_button = Button(
+            self.show_editor_button.x + constants.SHOW_EDITOR_BUTTON_WIDTH + 100,
+            self.y + constants.SHOW_EDITOR_BUTTON_Y,
+            60,
+            constants.CONTROL_BAR_BUTTON_HEIGHT,
+            "Load",
+        )
+
     def click(
         self,
         mouse_x: int,
@@ -48,17 +56,26 @@ class ControlBar:
             self.next_step_button.click()
             return
 
+        if self.load_step_button.rect.collidepoint(mouse_x, mouse_y):
+            self.load_step_button.click()
+            return
+
     def reset(self):
         self.show_editor_button.reset()
         self.next_step_button.reset()
+        self.load_step_button.reset()
 
     def set_toggle_show_editor(self, toggle_show_editor: Callable[[], None]):
         self.show_editor_button.set_onclick(toggle_show_editor)
 
     def set_next_step(self, next_step: Callable[[], None]):
         self.next_step_button.set_onclick(next_step)
+    
+    def set_load_step(self, load_step: Callable[[], None]):
+        self.load_step_button.set_onclick(load_step)
 
     def draw(self) -> None:
         self.screen.fill(constants.BLUE, self.rect)
         self.show_editor_button.draw(self.screen)
         self.next_step_button.draw(self.screen)
+        self.load_step_button.draw(self.screen)

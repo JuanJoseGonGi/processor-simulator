@@ -14,18 +14,14 @@ class Memory:
         self.y = constants.MEMORY_Y
         self.width = constants.MEMORY_WIDTH
         self.height = constants.MEMORY_HEIGHT
-        self.XhearBoard = constants.HEARBOARD_X
-        self.yHearBoard = constants.HEARBOARD_Y
-        self.widthHearBoard = constants.HEARDBOARD_WIDTH
-        self.heightHearBoard = constants.HEARDBOARD_HEIGTH
         self.HearBoard = pg.Rect(
-            self.XhearBoard, self.yHearBoard, self.widthHearBoard, self.heightHearBoard
+            constants.HEARBOARD_X, constants.HEARBOARD_Y, constants.HEARDBOARD_WIDTH, constants.HEARDBOARD_HEIGTH
         )
         self.HearBoard2 = pg.Rect(
-            self.XhearBoard / 1.25,
-            self.yHearBoard,
-            self.widthHearBoard,
-            self.heightHearBoard,
+            constants.HEARBOARD_X / 1.25,
+            constants.HEARBOARD_Y,
+            constants.HEARDBOARD_WIDTH,
+            constants.HEARDBOARD_HEIGTH,
         )
         self.rect = pg.Rect(self.x / 1.25, self.y, self.width, self.height)
         self.rect2 = pg.Rect(self.x, self.y, self.width, self.height)
@@ -62,6 +58,11 @@ class Memory:
                 constants.MEMORY_CELL_HEIGHT + constants.MEMORY_CELL_GAP_Y
             )
             self.data[address] = MemoryCell(x, y, address, self.rect2)
+
+    def set_instructions(self, intructions):
+        for i in range(16):
+            address = f"{i:02d}"
+            self.data[address].set_data(intructions[i])
 
     def set_address(self) -> None:
         received_address = self.address_iface.get_data()
