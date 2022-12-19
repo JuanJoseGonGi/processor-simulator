@@ -1,8 +1,9 @@
 import pygame as pg
 
-import constants
-
+from models.control.instructions_set import Codop
 from models.record import Record
+
+import constants
 
 
 class ALU:
@@ -22,7 +23,6 @@ class ALU:
             constants.ALU_INPUT_HEIGHT,
             self.rect,
         )
-
         self.input_a.name = "A"
 
         self.input_b = Record(
@@ -32,7 +32,6 @@ class ALU:
             constants.ALU_INPUT_HEIGHT,
             self.rect,
         )
-
         self.input_b.name = "B"
 
         self.output = Record(
@@ -42,10 +41,163 @@ class ALU:
             constants.ALU_INPUT_HEIGHT,
             self.rect,
         )
-
         self.output.name = "OUT"
 
-        self.instruction = None
+        self.codop: Codop | None = None
+
+    def set_codop(self, codop: Codop) -> None:
+        self.codop = codop
+
+    def add(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        number_a = int(data_a)
+        number_b = int(data_b)
+        output = number_a + number_b
+
+        self.output.set_data(str(output))
+
+    def sub(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        number_a = int(data_a)
+        number_b = int(data_b)
+        output = number_a - number_b
+
+        self.output.set_data(str(output))
+
+    def mpy(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        number_a = int(data_a)
+        number_b = int(data_b)
+        output = number_a * number_b
+
+        self.output.set_data(str(output))
+
+    def div(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        number_a = int(data_a)
+        number_b = int(data_b)
+        output = number_a / number_b
+
+        self.output.set_data(str(output))
+
+    def logic_and(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        cond_a = bool(data_a)
+        cond_b = bool(data_b)
+        output = cond_a and cond_b
+
+        self.output.set_data(str(output))
+
+    def logic_or(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        cond_a = bool(data_a)
+        cond_b = bool(data_b)
+        output = cond_a or cond_b
+
+        self.output.set_data(str(output))
+
+    def logic_not(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        cond_a = bool(data_a)
+        output = not cond_a
+
+        self.output.set_data(str(output))
+
+    def compare(self) -> None:
+        data_a = self.input_a.get_data()
+        if data_a is None:
+            return
+
+        data_b = self.input_b.get_data()
+        if data_b is None:
+            return
+
+        number_a = int(data_a)
+        number_b = int(data_b)
+        output = number_a == number_b
+
+        self.output.set_data(str(output))
+
+    def execute(self) -> None:
+        if self.codop is None:
+            return
+
+        if self.codop == Codop.ADD:
+            self.add()
+            return
+
+        if self.codop == Codop.SUB:
+            self.sub()
+            return
+
+        if self.codop == Codop.MPY:
+            self.mpy()
+            return
+
+        if self.codop == Codop.DIV:
+            self.div()
+            return
+
+        if self.codop == Codop.AND:
+            self.logic_and()
+            return
+
+        if self.codop == Codop.OR:
+            self.logic_or()
+            return
+
+        if self.codop == Codop.NOT:
+            self.logic_not()
+            return
+
+        if self.codop == Codop.COMPARE:
+            self.compare()
+            return
 
     def draw(self, screen: pg.surface.Surface) -> None:
         points = [
