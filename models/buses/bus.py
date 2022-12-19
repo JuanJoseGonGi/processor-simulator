@@ -24,4 +24,4 @@ class Bus(DataHolder[T]):
         pass
 
     def draw(self, screen):
-        pg.draw.lines(screen, constants.WHITE, False, self.points, self.width)
+        pg.draw.lines(screen, constants.BEIGE, False, self.points, self.width)

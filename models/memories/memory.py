@@ -9,14 +9,20 @@ from models.buses.system_bus import SystemBus
 
 from typing import Any
 
-
 class Memory:
     def __init__(self, system_bus: SystemBus):
         self.x = constants.MEMORY_X
         self.y = constants.MEMORY_Y
         self.width = constants.MEMORY_WIDTH
         self.height = constants.MEMORY_HEIGHT
-        self.rect = pg.Rect(self.x, self.y, self.width, self.height)
+        self.XhearBoard = constants.HEARBOARD_X
+        self.yHearBoard = constants.HEARBOARD_Y
+        self.widthHearBoard = constants.HEARDBOARD_WIDTH
+        self.heightHearBoard = constants.HEARDBOARD_HEIGTH
+        self.HearBoard = pg.Rect(self.XhearBoard , self.yHearBoard, self.widthHearBoard, self.heightHearBoard)
+        self.HearBoard2 = pg.Rect(self.XhearBoard / 1.25, self.yHearBoard, self.widthHearBoard, self.heightHearBoard)
+        self.rect = pg.Rect(self.x  / 1.25, self.y, self.width, self.height)
+        self.rect2 = pg.Rect(self.x, self.y, self.width, self.height)
 
         self.address = ""
         self.control = ""
@@ -29,8 +35,9 @@ class Memory:
             system_bus.control_bus,
         )
 
-        self.data: dict[str, MemoryCell] = {}
-        for i in range(32):
+        self.data: dict[str, MemoryCell] = {}        
+
+        for i in range(16):
             address = f"{i:02d}"
             x = constants.MEMORY_CELL_X + (i // 8) * (
                 constants.MEMORY_CELL_WIDTH + constants.MEMORY_CELL_GAP_X
@@ -39,6 +46,17 @@ class Memory:
                 constants.MEMORY_CELL_HEIGHT + constants.MEMORY_CELL_GAP_Y
             )
             self.data[address] = MemoryCell(x, y, address, self.rect)
+    
+        
+        for i in range(16):
+            address = f"{i+16:02d}"
+            x = constants.MEMORY_CELL_X + (i // 8) * (
+                constants.MEMORY_CELL_WIDTH + constants.MEMORY_CELL_GAP_X
+            )
+            y = constants.MEMORY_CELL_Y + (i % 8) * (
+                constants.MEMORY_CELL_HEIGHT + constants.MEMORY_CELL_GAP_Y
+            )
+            self.data[address] = MemoryCell(x, y, address, self.rect2)
 
     def get_address(self) -> str:
         return self.address
@@ -87,8 +105,32 @@ class Memory:
     def update(self):
         self.control_iface.get_data()
 
-    def draw(self, screen: pg.surface.Surface):
-        pg.draw.rect(screen, constants.GREEN, self.rect)
+    def draw(self, screen: pg.surface.Surface): 
+
+        pg.draw.rect(screen, constants.LIGTH_BLUE_2, self.rect)
+        pg.draw.rect(screen, constants.LIGTH_BLUE, self.rect2)
+        pg.draw.rect(screen, constants.LIGTH_BLUE, self.HearBoard)
+        pg.draw.rect(screen, constants.LIGTH_BLUE_2, self.HearBoard2)
+
+        text = pg.font.SysFont(constants.FONT, 20).render(
+            "Program Memory", True, constants.BLACK    
+        )
+
+        rect = text.get_rect();
+        rect.center = self.rect.center
+        rect.top = self.rect.top - 20
+        
+        screen.blit(text, rect)
+
+        text2 = pg.font.SysFont(constants.FONT, 20).render(
+            "Data Memory", True, constants.BLACK
+        )
+
+        rect2 = text2.get_rect();
+        rect2.center = self.rect2.center
+        rect2.top = self.rect2.top - 20
+        
+        screen.blit(text2, rect2)
 
         for cell in self.data.values():
             cell.draw(screen)

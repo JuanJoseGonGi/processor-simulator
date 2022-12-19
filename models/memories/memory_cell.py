@@ -27,10 +27,10 @@ class MemoryCell(DataHolder[T]):
         pass
 
     def draw(self, screen: pg.surface.Surface):
-        pg.draw.rect(screen, constants.PURPLE, self.rect)
+        pg.draw.rect(screen, constants.WHITE, self.rect)
 
         text = pg.font.SysFont(constants.FONT, 12).render(
-            f"{self.address}:{self.data}", True, constants.WHITE
+            f"{self.address}:{self.data}", True, constants.BLACK
         )
         text_rect = text.get_rect()
         text_rect.center = self.rect.center
