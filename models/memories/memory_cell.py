@@ -17,7 +17,7 @@ class MemoryCell(DataHolder[str | None]):
 
         self.address = address
 
-        super().__init__(None)
+        super().__init__(address)
 
     def update(self):
         pass

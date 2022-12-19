@@ -1,7 +1,7 @@
 from models.data_holder import DataHolder
 from models.buses.bus import Bus
 
-from typing import TypeVar
+from typing import TypeVar, Any
 
 T = TypeVar("T")
 
@@ -13,9 +13,15 @@ class Interface(DataHolder[T]):
     ):
         self.bus = bus
 
-    def set_data(self, data: T | None) -> None:
-        self.bus.set_data(data)
+    def set_data(self, data: T | None, locker: Any) -> None:
+        self.bus.set_data(data, locker)
         return
 
     def get_data(self) -> T | None:
         return self.bus.get_data()
+
+    def lock(self, locker=None):
+        return self.bus.lock(locker)
+
+    def unlock(self, locker=None):
+        return self.bus.unlock(locker)

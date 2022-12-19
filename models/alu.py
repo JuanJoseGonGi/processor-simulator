@@ -2,6 +2,7 @@ import pygame as pg
 
 from models.control.instructions_set import Codop
 from models.record import Record
+from models.instructions.instruction import Instruction
 
 import constants
 
@@ -61,7 +62,7 @@ class ALU:
         number_b = int(data_b)
         output = number_a + number_b
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def sub(self) -> None:
         data_a = self.input_a.get_data()
@@ -76,7 +77,7 @@ class ALU:
         number_b = int(data_b)
         output = number_a - number_b
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def mpy(self) -> None:
         data_a = self.input_a.get_data()
@@ -91,7 +92,7 @@ class ALU:
         number_b = int(data_b)
         output = number_a * number_b
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def div(self) -> None:
         data_a = self.input_a.get_data()
@@ -106,7 +107,7 @@ class ALU:
         number_b = int(data_b)
         output = number_a / number_b
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def logic_and(self) -> None:
         data_a = self.input_a.get_data()
@@ -121,7 +122,7 @@ class ALU:
         cond_b = bool(data_b)
         output = cond_a and cond_b
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def logic_or(self) -> None:
         data_a = self.input_a.get_data()
@@ -136,7 +137,7 @@ class ALU:
         cond_b = bool(data_b)
         output = cond_a or cond_b
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def logic_not(self) -> None:
         data_a = self.input_a.get_data()
@@ -146,7 +147,7 @@ class ALU:
         cond_a = bool(data_a)
         output = not cond_a
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def compare(self) -> None:
         data_a = self.input_a.get_data()
@@ -161,7 +162,7 @@ class ALU:
         number_b = int(data_b)
         output = number_a == number_b
 
-        self.output.set_data(str(output))
+        self.output.set_data(str(output), None)
 
     def execute(self) -> None:
         if self.codop is None:
@@ -198,6 +199,24 @@ class ALU:
         if self.codop == Codop.COMPARE:
             self.compare()
             return
+
+    def lock(self, locker: Instruction) -> None:
+        self.input_a.lock(locker)
+        self.input_b.lock(locker)
+
+        self.locker = locker
+
+    def unlock(self, locker: Instruction) -> None:
+        self.input_a.unlock(locker)
+        self.input_b.unlock(locker)
+
+    def set_data(self, data: str | None, locker: Instruction) -> None:
+        if self.input_a.get_data() is None:
+            self.input_a.set_data(data, locker)
+            return
+
+        self.input_b.set_data(data, locker)
+        return
 
     def draw(self, screen: pg.surface.Surface) -> None:
         points = [

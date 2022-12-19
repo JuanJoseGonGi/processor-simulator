@@ -1,7 +1,9 @@
 import pygame as pg
+import traceback
 
 from models.record import Record
 from models.alu import ALU
+from models.data_holder import DataHolderBusyException
 from models.instructions.instruction import Instruction
 from models.control.control_signal import ControlSignal
 from models.control.instructions_set import InstructionsSet
@@ -11,13 +13,13 @@ from models.memories.memory_mode import MemoryMode
 
 import constants
 
-from typing import List
+from typing import List, Tuple
 
 FETCH = [
-    [ControlSignal.COPY_PC_TO_MAR],
-    [ControlSignal.READ_FROM_MEMORY],
-    [ControlSignal.COPY_DATA_IFACE_TO_MBR],
-    [ControlSignal.COPY_MBR_TO_IR, ControlSignal.INCREASE_PC],
+    [ControlSignal.LOCK_MAR, ControlSignal.COPY_PC_TO_MAR],
+    [ControlSignal.READ_FROM_MEMORY, ControlSignal.UNLOCK_MAR],
+    [ControlSignal.LOCK_MBR, ControlSignal.COPY_DATA_IFACE_TO_MBR],
+    [ControlSignal.COPY_MBR_TO_IR, ControlSignal.UNLOCK_MBR, ControlSignal.INCREASE_PC],
 ]
 
 
@@ -52,12 +54,13 @@ class ControlUnit:
         self.data_iface = data_iface
         self.control_iface = control_iface
         self.stack = stack
-        self.stack_pointer = 31
+        self.stack_pointer = len(stack)
 
         self.instructions_pipeline: List[Instruction] = []
         self.instructions_set = InstructionsSet()
 
         self.fetch_stage = 0
+        self.fetch_instruction = Instruction(Codop.FETCH, [])
 
     def add_instruction(self, instruction: Instruction) -> None:
         self.instructions_pipeline.append(instruction)
@@ -68,73 +71,70 @@ class ControlUnit:
     def increase_pc(self) -> None:
         pc_data = self.PC.get_data()
         if pc_data is None:
-            raise Exception("PC data is None")
+            print("PC data is None")
+            return
 
         if pc_data == "15":
-            self.PC.set_data("00")
+            self.PC.set_data("00", None)
             return
 
         increased_pc_data = int(pc_data) + 1
 
-        self.PC.set_data(f"{increased_pc_data:02d}")
+        self.PC.set_data(f"{increased_pc_data:02d}", None)
 
     def stack_pop(self) -> str | None:
-        if self.stack_pointer > 31:
+        if self.stack_pointer >= len(self.stack):
             return None
 
         data = self.stack[self.stack_pointer].get_data()
-        self.stack[self.stack_pointer].set_data(None)
         self.stack_pointer += 1
 
         return data
 
-    def stack_push(self, data: str | None) -> None:
-        if self.stack_pointer < 1:
-            raise Exception("Stack overflow")
+    def stack_push(self, data: str | None, instruction: Instruction) -> None:
+        if self.stack_pointer <= 0:
+            print("Stack overflow")
+            return
 
         self.stack_pointer -= 1
-        self.stack[self.stack_pointer].set_data(self.MBR.get_data())
+        self.stack[self.stack_pointer].set_data(data, instruction)
 
         return
 
     def send_control_signal(
-        self, control_signal: ControlSignal, instruction: Instruction | None = None
+        self, control_signal: ControlSignal, instruction: Instruction
     ) -> None:
         print(f"Sending control signal: {control_signal} on instruction: {instruction}")
 
         if control_signal == ControlSignal.COPY_PC_TO_MAR:
-            self.MAR.set_data(self.PC.get_data())
+            self.MAR.set_data(self.PC.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.COPY_MBR_TO_MAR:
-            self.MAR.set_data(self.MBR.get_data())
+            self.MAR.set_data(self.MBR.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.COPY_MBR_TO_IR:
-            self.IR.set_data(self.MBR.get_data())
-            return
-
-        if control_signal == ControlSignal.COPY_IR_TO_MAR:
-            self.MAR.set_data(self.IR.get_data())
+            self.IR.set_data(self.MBR.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.COPY_ALU_TO_MBR:
-            self.MBR.set_data(self.ALU.output.get_data())
+            self.MBR.set_data(self.ALU.output.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.READ_FROM_MEMORY:
-            self.control_iface.set_data(MemoryMode.READ)
-            self.address_iface.set_data(self.MAR.get_data())
+            self.control_iface.set_data(MemoryMode.READ, instruction)
+            self.address_iface.set_data(self.MAR.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.WRITE_TO_MEMORY:
-            self.control_iface.set_data(MemoryMode.WRITE)
-            self.address_iface.set_data(self.MAR.get_data())
-            self.data_iface.set_data(self.MBR.get_data())
+            self.control_iface.set_data(MemoryMode.WRITE, instruction)
+            self.address_iface.set_data(self.MAR.get_data(), instruction)
+            self.data_iface.set_data(self.MBR.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.COPY_DATA_IFACE_TO_MBR:
-            self.MBR.set_data(self.data_iface.get_data())
+            self.MBR.set_data(self.data_iface.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.INCREASE_PC:
@@ -142,19 +142,19 @@ class ControlUnit:
             return
 
         if control_signal == ControlSignal.PUSH_MBR_TO_STACK:
-            self.stack_push(self.MBR.get_data())
+            self.stack_push(self.MBR.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.POP_STACK_TO_MBR:
-            self.MBR.set_data(self.stack_pop())
+            self.MBR.set_data(self.stack_pop(), instruction)
             return
 
         if control_signal == ControlSignal.PUSH_ALU_TO_STACK:
-            self.stack_push(self.ALU.output.get_data())
+            self.stack_push(self.ALU.output.get_data(), instruction)
             return
 
         if control_signal == ControlSignal.POP_STACK_TO_ALU:
-            self.ALU.output.set_data(self.stack_pop())
+            self.ALU.set_data(self.stack_pop(), instruction)
             return
 
         if control_signal == ControlSignal.EXECUTE_ALU:
@@ -168,9 +168,10 @@ class ControlUnit:
 
             next_pc = self.stack_pop()
             if next_pc is None:
-                raise Exception("Next PC is None")
+                print("Next PC is None")
+                return
 
-            self.PC.set_data(next_pc)
+            self.PC.set_data(next_pc, instruction)
 
             return
 
@@ -179,7 +180,8 @@ class ControlUnit:
             self.fetch_stage = 0
             return
 
-        if instruction is None:
+        if control_signal == ControlSignal.COPY_OPERAND_TO_MAR:
+            self.MAR.set_data(instruction.operand, instruction)
             return
 
         if control_signal == ControlSignal.COPY_CODOP_TO_ALU:
@@ -190,23 +192,57 @@ class ControlUnit:
             self.remove_instruction(instruction)
             return
 
-    def send_control_signals(
-        self,
-        control_signals: List[ControlSignal],
-        instruction: Instruction | None = None,
-    ) -> None:
-        for signal in control_signals:
-            self.send_control_signal(signal, instruction)
-
-    def fetch(self) -> None:
-        if len(self.instructions_pipeline) >= 5:
+        if control_signal == ControlSignal.LOCK_MBR:
+            self.MBR.lock(instruction)
             return
+
+        if control_signal == ControlSignal.UNLOCK_MBR:
+            self.MBR.unlock(instruction)
+            return
+
+        if control_signal == ControlSignal.LOCK_MAR:
+            self.MAR.lock(instruction)
+            return
+
+        if control_signal == ControlSignal.UNLOCK_MAR:
+            self.MAR.unlock(instruction)
+            return
+
+        if control_signal == ControlSignal.LOCK_ALU:
+            self.ALU.lock(instruction)
+            return
+
+        if control_signal == ControlSignal.UNLOCK_ALU:
+            self.ALU.unlock(instruction)
+            return
+
+    def send_control_signals(
+        self, control_signals: List[Tuple[List[ControlSignal], Instruction]]
+    ) -> None:
+        for signal_instruction in control_signals:
+            try:
+                for signal in signal_instruction[0]:
+                    self.send_control_signal(signal, signal_instruction[1])
+
+            except DataHolderBusyException:
+                traceback.print_exc()
+                print("Data holder is busy")
+                continue
+
+            if signal_instruction[1].codop == Codop.FETCH:
+                self.fetch_stage += 1
+                continue
+
+            signal_instruction[1].increase_stage()
+
+    def fetch(self) -> List[ControlSignal]:
+        if len(self.instructions_pipeline) >= 5:
+            return []
 
         if self.fetch_stage >= len(FETCH):
             self.fetch_stage = 0
 
-        signals = FETCH[self.fetch_stage]
-        self.send_control_signals(signals)
+        return FETCH[self.fetch_stage]
 
     def decode(self) -> None:
         if len(self.instructions_pipeline) >= 5:
@@ -217,13 +253,16 @@ class ControlUnit:
 
         ir_data = self.IR.get_data()
         if ir_data is None:
+            print("IR is empty")
             return
 
         decoded_instruction = ir_data.split()
         if len(decoded_instruction) == 0:
+            print("Invalid instruction")
             return
 
-        if decoded_instruction[0] not in Codop:
+        if decoded_instruction[0] not in Codop.__members__.keys():
+            print(f"Invalid codop: {decoded_instruction[0]}")
             return
 
         codop = Codop[decoded_instruction[0]]
@@ -231,19 +270,31 @@ class ControlUnit:
         if len(decoded_instruction) == 1:
             decoded_instruction.append("")
 
-        instruction = Instruction(codop, decoded_instruction[1])
+        instruction = Instruction(
+            codop,
+            self.instructions_set.get_instruction_executor(codop),
+            operand=decoded_instruction[1],
+        )
         self.instructions_pipeline.append(instruction)
 
     def update(self) -> None:
-        for instruction in self.instructions_pipeline:
-            signals = instruction.update()
-            self.send_control_signals(signals, instruction)
-            instruction.increase_stage()
+        print()
 
-        self.fetch()
-        self.fetch_stage += 1
+        signals: List[Tuple[List[ControlSignal], Instruction]] = []
+
+        for instruction in self.instructions_pipeline:
+            signals.append(instruction.update())
+
+        signals.append((self.fetch(), self.fetch_instruction))
 
         self.decode()
+
+        try:
+            self.send_control_signals(signals)
+        except DataHolderBusyException:
+            traceback.print_exc()
+            print("Data holder busy")
+            return
 
     def draw(self, screen: pg.surface.Surface) -> None:
         pg.draw.rect(screen, constants.GREEN, self.rect)

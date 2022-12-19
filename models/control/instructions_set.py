@@ -5,34 +5,40 @@ from typing import List, Dict
 
 
 class Codop(Enum):
-    ADD = "ADD"
-    SUB = "SUB"
-    MPY = "MPY"
-    DIV = "DIV"
-    PUSH = "PUSH"
-    POP = "POP"
-    ABS = "ABS"
-    AND = "AND"
-    OR = "OR"
-    NOT = "NOT"
-    COMPARE = "COMPARE"
-    INPUT = "INPUT"
-    OUTPUT = "OUTPUT"
-    CONDJUMP = "CONDJUMP"
-    RETURN = "RETURN"
-    START_IO = "START_IO"
+    ADD = "0000"
+    SUB = "0001"
+    MPY = "0010"
+    DIV = "0011"
+    PUSH = "0100"
+    POP = "0101"
+    ABS = "0110"
+    AND = "0111"
+    OR = "1000"
+    NOT = "1001"
+    COMPARE = "1010"
+    INPUT = "1011"
+    OUTPUT = "1100"
+    CONDJUMP = "1101"
+    RETURN = "1110"
+    START_IO = "1111"
+
+    FETCH = "FETCH"
 
 
 UNARY_OPERATION: List[List[ControlSignal]] = [
-    [ControlSignal.POP_STACK_TO_ALU],
+    [ControlSignal.LOCK_ALU, ControlSignal.POP_STACK_TO_ALU],
     [ControlSignal.COPY_CODOP_TO_ALU],
     [ControlSignal.EXECUTE_ALU],
-    [ControlSignal.PUSH_ALU_TO_STACK],
+    [ControlSignal.PUSH_ALU_TO_STACK, ControlSignal.UNLOCK_ALU],
 ]
 
 BINARY_OPERATION: List[List[ControlSignal]] = [
-    [ControlSignal.POP_STACK_TO_ALU]
-] + UNARY_OPERATION
+    [ControlSignal.LOCK_ALU, ControlSignal.POP_STACK_TO_ALU],
+    [ControlSignal.POP_STACK_TO_ALU],
+    [ControlSignal.COPY_CODOP_TO_ALU],
+    [ControlSignal.EXECUTE_ALU],
+    [ControlSignal.PUSH_ALU_TO_STACK, ControlSignal.UNLOCK_ALU],
+]
 
 INSTRUCTION_SET: Dict[Codop, List[List[ControlSignal]]] = {
     Codop.ADD: BINARY_OPERATION,
@@ -40,17 +46,25 @@ INSTRUCTION_SET: Dict[Codop, List[List[ControlSignal]]] = {
     Codop.MPY: BINARY_OPERATION,
     Codop.DIV: BINARY_OPERATION,
     Codop.PUSH: [
-        [ControlSignal.COPY_IR_TO_MAR],
-        [ControlSignal.READ_FROM_MEMORY],
-        [ControlSignal.COPY_DATA_IFACE_TO_MBR],
-        [ControlSignal.PUSH_MBR_TO_STACK],
+        [ControlSignal.LOCK_MAR, ControlSignal.COPY_OPERAND_TO_MAR],
+        [ControlSignal.READ_FROM_MEMORY, ControlSignal.UNLOCK_MAR],
+        [ControlSignal.LOCK_MBR, ControlSignal.COPY_DATA_IFACE_TO_MBR],
+        [ControlSignal.PUSH_MBR_TO_STACK, ControlSignal.UNLOCK_MBR],
     ],
     Codop.POP: [
         [
+            ControlSignal.LOCK_MBR,
             ControlSignal.POP_STACK_TO_MBR,
-            ControlSignal.COPY_IR_TO_MAR,
         ],
-        [ControlSignal.WRITE_TO_MEMORY],
+        [
+            ControlSignal.LOCK_MAR,
+            ControlSignal.COPY_OPERAND_TO_MAR,
+        ],
+        [
+            ControlSignal.WRITE_TO_MEMORY,
+            ControlSignal.UNLOCK_MAR,
+            ControlSignal.UNLOCK_MBR,
+        ],
     ],
     Codop.ABS: UNARY_OPERATION,
     Codop.AND: BINARY_OPERATION,

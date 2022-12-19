@@ -27,7 +27,7 @@ class Processor:
             self.rect,
         )
         self.PC.name = "PC"
-        self.PC.set_data("00")
+        self.PC.set_data("00", None)
 
         self.MBR = Record(
             constants.MBR_X,

@@ -15,7 +15,10 @@ class Memory:
         self.width = constants.MEMORY_WIDTH
         self.height = constants.MEMORY_HEIGHT
         self.HearBoard = pg.Rect(
-            constants.HEARBOARD_X, constants.HEARBOARD_Y, constants.HEARDBOARD_WIDTH, constants.HEARDBOARD_HEIGTH
+            constants.HEARBOARD_X,
+            constants.HEARBOARD_Y,
+            constants.HEARDBOARD_WIDTH,
+            constants.HEARDBOARD_HEIGTH,
         )
         self.HearBoard2 = pg.Rect(
             constants.HEARBOARD_X / 1.25,
@@ -62,7 +65,7 @@ class Memory:
     def set_instructions(self, intructions):
         for i in range(16):
             address = f"{i:02d}"
-            self.data[address].set_data(intructions[i])
+            self.data[address].set_data(intructions[i], None)
 
     def set_address(self) -> None:
         received_address = self.address_iface.get_data()
@@ -74,19 +77,22 @@ class Memory:
 
     def get_data(self) -> str | None:
         if self.address not in self.data:
-            raise Exception(f"Memory address {self.address} not found")
+            print(f"Memory address {self.address} not found")
+            return None
 
         return self.data[self.address].get_data()
 
     def set_data(self) -> None:
         if self.address == "":
-            raise Exception("Memory address not specified")
+            print("Memory address not specified")
+            return None
 
         if self.address not in self.data:
-            raise Exception(f"Memory address {self.address} not found")
+            print(f"Memory address {self.address} not found")
+            return None
 
         received_data = self.data_iface.get_data()
-        self.data[self.address].set_data(received_data)
+        self.data[self.address].set_data(received_data, None)
 
         return
 
@@ -109,7 +115,7 @@ class Memory:
 
         if self.control == MemoryMode.READ:
             data = self.get_data()
-            self.data_iface.set_data(data)
+            self.data_iface.set_data(data, None)
             return
 
         if self.control == MemoryMode.WRITE:
