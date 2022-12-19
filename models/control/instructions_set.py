@@ -62,7 +62,9 @@ INSTRUCTION_SET: Dict[Codop, List[List[ControlSignal]]] = {
     Codop.OUTPUT: [
         # TODO: Julian will implement this
     ],
-    Codop.CONDJUMP: BINARY_OPERATION,
+    Codop.CONDJUMP: [
+        [ControlSignal.COPY_MBR_TO_PC_IF_TRUE],
+    ],
     Codop.RETURN: [
         # TODO: If we have time, we will implement this with the interrupts
     ],

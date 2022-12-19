@@ -153,6 +153,19 @@ class ControlUnit:
             self.remove_instruction(instruction)
             return
 
+        if control_signal == ControlSignal.COPY_MBR_TO_PC_IF_TRUE:
+            cond = bool(self.stack_pop())
+            if not cond:
+                return
+
+            next_pc = self.stack_pop()
+            if next_pc is None:
+                raise Exception("Next PC is None")
+
+            self.PC.set_data(next_pc)
+
+            return
+
     def send_control_signals(
         self, control_signals: List[ControlSignal], instruction: Instruction
     ) -> None:
