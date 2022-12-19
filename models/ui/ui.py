@@ -3,6 +3,8 @@ import pygame as pg
 from models.ui.instructions_text_input import InstructionsTextInput
 from models.ui.control_bar import ControlBar
 
+import constants
+
 from typing import List, Sequence, Tuple
 
 
@@ -13,6 +15,7 @@ class UI:
 
         self.control_bar = ControlBar(screen)
         self.control_bar.set_toggle_show_editor(self.toggle_show_editor)
+        self.control_bar.set_next_step(self.next_step)
 
     def draw(
         self,
@@ -45,3 +48,6 @@ class UI:
 
     def toggle_show_editor(self):
         self.show_editor = not self.show_editor
+
+    def next_step(self):
+        pg.event.post(pg.event.Event(constants.COMPUTER_CLK))

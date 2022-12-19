@@ -10,7 +10,6 @@ def main():
     screen = pg.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
     pg.display.set_caption("Computer")
     clock = pg.time.Clock()
-    pg.time.set_timer(constants.COMPUTER_CLK, 1000)
 
     comp = computer.Computer()
     user_interface = UI(screen)

@@ -16,14 +16,20 @@ class ControlBar:
         self.screen = screen
 
         self.show_editor_button = Button(
-            self.x + 20,
-            constants.CONTROL_BAR_BUTTON_Y + self.y,
-            60,
+            self.x + constants.SHOW_EDITOR_BUTTON_X,
+            self.y + constants.SHOW_EDITOR_BUTTON_Y,
+            constants.SHOW_EDITOR_BUTTON_WIDTH,
             constants.CONTROL_BAR_BUTTON_HEIGHT,
             "Code",
         )
 
-        self.toggle_show_editor = lambda: None
+        self.next_step_button = Button(
+            self.show_editor_button.x + constants.SHOW_EDITOR_BUTTON_WIDTH + 20,
+            self.y + constants.SHOW_EDITOR_BUTTON_Y,
+            60,
+            constants.CONTROL_BAR_BUTTON_HEIGHT,
+            "Next",
+        )
 
     def click(
         self,
@@ -36,14 +42,23 @@ class ControlBar:
 
         if self.show_editor_button.rect.collidepoint(mouse_x, mouse_y):
             self.show_editor_button.click()
+            return
+
+        if self.next_step_button.rect.collidepoint(mouse_x, mouse_y):
+            self.next_step_button.click()
+            return
 
     def reset(self):
         self.show_editor_button.reset()
+        self.next_step_button.reset()
 
     def set_toggle_show_editor(self, toggle_show_editor: Callable[[], None]):
-        self.toggle_show_editor = toggle_show_editor
-        self.show_editor_button.set_onclick(self.toggle_show_editor)
+        self.show_editor_button.set_onclick(toggle_show_editor)
+
+    def set_next_step(self, next_step: Callable[[], None]):
+        self.next_step_button.set_onclick(next_step)
 
     def draw(self) -> None:
         self.screen.fill(constants.BLUE, self.rect)
         self.show_editor_button.draw(self.screen)
+        self.next_step_button.draw(self.screen)
