@@ -16,6 +16,7 @@ class UI:
         self.control_bar = ControlBar(screen)
         self.control_bar.set_toggle_show_editor(self.toggle_show_editor)
         self.control_bar.set_next_step(self.next_step)
+        self.control_bar.set_load_step(self.load_step)
 
     def draw(
         self,
@@ -48,6 +49,9 @@ class UI:
 
     def toggle_show_editor(self):
         self.show_editor = not self.show_editor
+
+    def load_step(self):
+        pg.event.post(pg.event.Event(constants.PRESS_LOAD))
 
     def next_step(self):
         pg.event.post(pg.event.Event(constants.COMPUTER_CLK))
